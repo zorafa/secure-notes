@@ -1,0 +1,67 @@
+name: Secure Notes CI/CD
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Cloner le dépôt
+        uses: actions/checkout@v3
+
+      - name: 🐍 Installer Python
+        run: |
+          sudo apt update
+          sudo apt install -y python3 python3-pip python3-venv
+
+      - name: 📦 Installer les dépendances
+        run: |
+          python3 -m venv venv
+          source venv/bin/activate
+          pip install -r requirements.txt
+
+      - name: 🛠 Exécuter les tests unitaires
+        run: |
+          source venv/bin/activate
+          python -m unittest discover tests
+
+  docker:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Cloner le dépôt
+        uses: actions/checkout@v3
+
+      - name: 🐳 Construire l’image Docker
+        run: |
+          docker build -t secure_notes .
+
+      - name: 🚀 Lancer un test de conteneur
+        run: |
+          docker run --rm secure_notes --help
+
+  security-scan:
+    needs: docker
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Cloner le dépôt
+        uses: actions/checkout@v3
+
+      - name: 🔎 Scanner avec SonarQube
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          docker run --rm -e SONAR_TOKEN=$SONAR_TOKEN sonarsource/sonar-scanner-cli
+
+      - name: 🛡 Scanner avec OWASP ZAP
+        run: |
+          docker run --rm owasp/zap2docker-stable zap-baseline.py -t http://localhost:8000
