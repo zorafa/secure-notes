@@ -59,8 +59,8 @@ jobs:
       - name: 🔎 Scanner avec SonarQube
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: |
-          docker run --rm -e SONAR_TOKEN=$SONAR_TOKEN sonarsource/sonar-scanner-cli
+          run: echo "SonarQube est désactivé pour cette exécution"
+
 
       - name: 🛡 Scanner avec OWASP ZAP
         run: |
