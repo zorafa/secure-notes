@@ -56,6 +56,6 @@ jobs:
       - name: 📥 Cloner le dépôt
         uses: actions/checkout@v3
 
-    -name: 🛡 Scanner avec OWASP ZAP
-    run: |
-      docker run --rm owasp/zap-stable zap-baseline.py -t http://localhost:8000
+      - name: 🛡 Scanner avec OWASP ZAP
+  run: |
+    docker run --rm owasp/zap-stable zap-baseline.py -t http://localhost:8000
